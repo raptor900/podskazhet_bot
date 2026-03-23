@@ -7,21 +7,14 @@ from bot.utils import count_tokens, format_structured_response
 
 class LLMManager:
     def __init__(self):
-        self.method = Config.LLM_METHOD
         self.max_context_tokens = Config.MAX_CONTEXT_TOKENS
 
-        if self.method == 'openrouter':
-            self.client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=Config.OPENROUTER_API_KEY,
-            )
-            self.model = Config.OPENROUTER_LLM_MODEL
-        else:
-            self.client = OpenAI(
-                base_url=Config.LOCAL_LLM_URL,
-                api_key="EMPTY",  # Local models don't need API key
-            )
-            self.model = Config.LOCAL_LLM_MODEL
+        # OpenRouter client for LLM
+        self.client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=Config.OPENROUTER_API_KEY,
+        )
+        self.model = Config.OPENROUTER_LLM_MODEL
 
     def get_response(self, question: str, context: List[str]) -> tuple:
         """Generate response based on context"""
@@ -63,7 +56,6 @@ class LLMManager:
             # Extract sources from context
             sources = []
             for ctx in context:
-                # Simple source extraction - you can enhance this
                 if "source:" in ctx.lower():
                     lines = ctx.split('\n')
                     for line in lines:

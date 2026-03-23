@@ -1,41 +1,9 @@
-version: '3.8'
-
-services:
-  telegram-bot:
-    build: .
-    container_name: telegram-knowledge-bot
-    volumes:
-      - ./knowledge_base:/app/knowledge_base
-      - ./user_queries:/app/user_queries
-      - ./chroma_db:/app/chroma_db
-    env_file:
-      - .env
-    restart: unless-stopped
-    networks:
-      - bot-network
-
-    # Optional: Local LLM service with vLLM (better than ollama)
-  local-llm:
-    image: vllm/vllm-openai:latest
-    container_name: local-llm
-    command: --model Qwen/Qwen2.5-7B-Instruct --port 8000 --max-model-len 8192
-    volumes:
-      - ./models:/root/.cache/huggingface
-    ports:
-      - "8000:8000"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    networks:
-      - bot-network
-    restart: unless-stopped
-    profiles:
-      - with-local-llm
-
-networks:
-  bot-network:
-    driver: bridge
+telegram-bot:
+  build: .
+  container_name: telegram-knowledge-bot
+  volumes:
+    - ./knowledge_base:/app/knowledge_base
+    - ./user_queries:/app/user_queries
+    - ./chroma_db:/app/chroma_db
+    - ./.env:/app/.env:ro
+  restart: unless-stopped

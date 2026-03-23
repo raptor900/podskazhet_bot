@@ -1,8 +1,6 @@
 import os
 from typing import List, Union
-import numpy as np
 from openai import OpenAI
-from sentence_transformers import SentenceTransformer
 import chromadb
 from chromadb.config import Settings
 
@@ -12,18 +10,15 @@ from bot.utils import chunk_text
 
 class EmbeddingManager:
     def __init__(self):
-        self.method = Config.EMBEDDING_METHOD
         self.chunk_size = Config.CHUNK_SIZE
         self.chunk_overlap = Config.CHUNK_OVERLAP
 
-        if self.method == 'openrouter':
-            self.client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=Config.OPENROUTER_API_KEY,
-            )
-            self.model = Config.OPENROUTER_EMBEDDING_MODEL
-        else:
-            self.model = SentenceTransformer(Config.LOCAL_EMBEDDING_MODEL)
+        # OpenRouter client for embeddings
+        self.client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=Config.OPENROUTER_API_KEY,
+        )
+        self.model = Config.OPENROUTER_EMBEDDING_MODEL
 
         # Initialize ChromaDB
         self.chroma_client = chromadb.PersistentClient(
@@ -36,15 +31,12 @@ class EmbeddingManager:
         )
 
     def get_embedding(self, text: str) -> List[float]:
-        """Get embedding for a single text"""
-        if self.method == 'openrouter':
-            response = self.client.embeddings.create(
-                model=self.model,
-                input=text
-            )
-            return response.data[0].embedding
-        else:
-            return self.model.encode(text).tolist()
+        """Get embedding for a single text via OpenRouter"""
+        response = self.client.embeddings.create(
+            model=self.model,
+            input=text
+        )
+        return response.data[0].embedding
 
     def index_document(self, file_path: str, content: str):
         """Index a document by splitting into chunks and storing embeddings"""
