@@ -12,6 +12,15 @@ class KnowledgeBaseManager:
         self.embedding_manager = EmbeddingManager()
         self.llm_manager = LLMManager()
         self.kb_path = Config.KNOWLEDGE_BASE_PATH
+        # Auto-rebuild on startup if knowledge base has files but collection is empty
+        if os.path.exists(self.kb_path) and any(os.listdir(self.kb_path)):
+            try:
+                count = self.embedding_manager.collection.count()
+                if count == 0:
+                    print("Knowledge base has files but collection is empty. Rebuilding index automatically...")
+                    self.rebuild_index()
+            except Exception as e:
+                print(f"Error checking collection during init: {e}")
 
     def load_all_documents(self) -> str:
         """Load all text from knowledge base"""
