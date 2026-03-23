@@ -35,7 +35,7 @@ async def rebuild_index(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
 
     # Check if user is admin (you can modify this list)
-    admin_ids = []  # Add admin Telegram IDs here
+    admin_ids = [192510379]  # Yuriy's Telegram ID
 
     if admin_ids and user_id not in admin_ids:
         await update.message.reply_text("⛔ У вас нет прав для выполнения этой команды.")
